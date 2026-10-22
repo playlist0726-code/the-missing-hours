@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="The Missing Hours is a short awareness game about how water collection can change a person's daily opportunities." />
+  <title>The Missing Hours | charity: water student concept</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffd84d'/%3E%3Cpath d='M20 16h24l5 10v24H15V26l5-10zm3 6-3 6v16h24V28l-3-6h-5v7H27v-7h-4z' fill='%23151c3a'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="The Missing Hours, a charity: water student game concept">
+        <span class="can-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><path d="M20 16h24l5 10v24H15V26l5-10zm3 6-3 6v16h24V28l-3-6h-5v7H27v-7h-4z" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-copy"><strong>The Missing Hours</strong><span>charity: water student concept</span></span>
+      </div>
+      <div class="step-indicator" aria-label="Game progress">
+        <span id="step-label">INTRO</span><i class="step-dot active"></i><i class="step-dot"></i><i class="step-dot"></i>
+      </div>
+    </header>
+
+    <noscript><p class="noscript">This game needs JavaScript enabled to play.</p></noscript>
+    <section class="game-frame">
+      <section class="screen start-screen" id="start-screen">
+        <div class="start-content">
+          <p class="eyebrow">One day. Limited time. Every hour matters.</p>
+          <h1 tabindex="-1">The Missing <span>Hours</span></h1>
+          <p class="lead">Start with a balanced day. Then discover how collecting water can take time away from education, health, work, and everyday life.</p>
+          <div class="start-actions">
+            <button class="primary" id="start-button">Start the day</button>
+            <span class="duration">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 11h-5v-2h3V6h2Z"/></svg>
+              About 60 seconds
+            </span>
+          </div>
+        </div>
+        <div class="start-visual" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="water-clock"><i class="hand long"></i><i class="hand short"></i><b class="clock-center"></b><span class="time-lost">3 HOURS</span></div>
+          <p class="mission-note">Clean water does more than improve health. It gives people time back.</p>
+        </div>
+      </section>
+
+      <section class="screen play-screen" id="play-screen" hidden>
+        <div class="play-main">
+          <div class="play-header">
+            <div>
+              <p class="eyebrow" id="stage-label">DAY 1 · PLAN</p>
+              <h2 id="stage-title" tabindex="-1">Meet your day</h2>
+              <p id="stage-instruction">Review your balanced 24-hour schedule, then lock it in.</p>
+            </div>
+            <div class="timer-card" aria-label="Time remaining"><span>TIME LEFT</span><strong id="timer">01:00</strong></div>
+          </div>
+
+          <div class="score-row" aria-label="Current scores">
+            <div class="score-chip"><span>HEALTH <b id="health-score">100</b></span><div class="meter"><i id="health-meter" style="width:100%"></i></div></div>
+            <div class="score-chip"><span>EDUCATION <b id="education-score">100</b></span><div class="meter"><i id="education-meter" style="width:100%"></i></div></div>
+            <div class="score-chip"><span>LIFE <b id="life-score">100</b></span><div class="meter"><i id="life-meter" style="width:100%"></i></div></div>
+          </div>
+
+          <div class="event-banner" id="event-banner" hidden>
+            <svg class="drop-icon" viewBox="0 0 40 52" aria-hidden="true"><path fill="currentColor" d="M20 1C33 20 38 28 38 38a18 18 0 0 1-36 0C2 28 7 20 20 1Z"/></svg>
+            <div><strong>A water journey takes 3 hours in this game</strong><span>A fictional challenge: remove three hours before time runs out.</span></div>
+          </div>
+
+          <div class="day-strip" id="day-strip" aria-label="24-hour schedule"></div>
+          <div class="activity-grid" id="activity-grid"></div>
+        </div>
+
+        <aside class="play-aside">
+          <p class="aside-label" id="aside-label">YOUR DAY</p>
+          <div class="hours-big"><span id="hours-value">24</span>h</div>
+          <p class="aside-copy" id="aside-copy">This schedule represents a full day. Once the water event begins, every removed hour will affect a part of life.</p>
+
+          <div class="feedback-card">
+            <strong>LIVE FEEDBACK</strong>
+            <p id="feedback" role="status" aria-live="polite">Your day is balanced. Ready to see what happens next?</p>
+          </div>
+
+          <div id="cut-progress" hidden>
+            <div class="progress-label"><span>HOURS REMOVED</span><span id="cut-count">0 / 3</span></div>
+            <div class="cut-meter"><i id="cut-meter"></i></div>
+          </div>
+
+          <div class="aside-actions">
+            <button class="primary" id="lock-button">Lock my schedule</button>
+            <button class="primary" id="finish-button" hidden disabled>See my impact</button>
+            <button class="secondary" id="restart-button">Reset game</button>
+          </div>
+        </aside>
+      </section>
+
+      <section class="screen result-screen" id="result-screen" hidden>
+        <div class="result-summary">
+          <p class="eyebrow">Day complete</p>
+          <h2 tabindex="-1">Your time changed.</h2>
+          <p>So did your opportunities. Your choices show how a three-hour water journey can reshape an entire day.</p>
+          <div class="total-score"><strong id="total-score">0</strong><span>/ 300</span></div>
+          <div class="result-actions">
+            <button class="primary" id="play-again-button">Play again</button>
+            <a class="link-button" href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">See how water gives time back</a>
+          </div>
+        </div>
+        <div class="result-detail">
+          <h3>Impact breakdown</h3>
+          <p class="score-explainer">Impact Score · game points, not a measure of real wellbeing.</p>
+          <div class="result-bars">
+            <div class="result-bar"><span>Health</span><div class="meter"><i id="result-health-meter"></i></div><b id="result-health">0</b></div>
+            <div class="result-bar"><span>Education</span><div class="meter"><i id="result-education-meter"></i></div><b id="result-education">0</b></div>
+            <div class="result-bar"><span>Life</span><div class="meter"><i id="result-life-meter"></i></div><b id="result-life">0</b></div>
+          </div>
+          <div class="impact-card"><strong id="impact-heading">Your biggest impact</strong><p id="impact-copy"></p></div>
+          <div class="choices-summary" id="choices-summary"></div>
+          <div class="reward-card"><strong>Time Saver badge earned</strong><p>You made room for the water journey. Imagine those three hours returned to your day through reliable access to clean water.</p></div>
+          <p class="disclaimer">This is a brief awareness experience, not a simulation of any individual community's lived experience. Learn more from charity: water's own stories and reporting.</p>
+        </div>
+      </section>
+    </section>
+    <p class="footer-note">An independent student project inspired by charity: water. Three hours is a fictional game scenario, not a universal water-collection statistic. <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Learn about the mission ↗</a></p>
+  </main>
+  <div class="celebration" id="celebration" aria-hidden="true"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

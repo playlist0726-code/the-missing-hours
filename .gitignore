@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+playwright-report/
+test-results/
+docs/Project_5_COMPLETED.pdf
+docs/Submission_answers.md
