@@ -45,3 +45,19 @@ test('all legal sequences through three cuts respect constraints',()=>{
 test('clock formats start, final seconds, and expired values',()=>{
  assert.equal(formatTime(60),'01:00'); assert.equal(formatTime(9),'00:09'); assert.equal(formatTime(-1),'00:00');
 });
+test('each difficulty enforces its own goal, undo, and timeout',async()=>{
+ const {MODES}=await import('../game.js');
+ for (const mode of Object.values(MODES)) {
+  const day=createDay();
+  adjust(day,5,'minus',mode.hours);
+  completeDay(day,mode.hours);
+  assert.equal(removedHours(day),mode.hours);
+  assert.equal(day[5].hours,1);
+  assert.equal(adjust(day,3,'minus',mode.hours),false);
+  assert.equal(adjust(day,0,'plus',mode.hours),true);
+  assert.equal(removedHours(day),mode.hours-1);
+  assert.equal(adjust(day,3,'minus',mode.hours),true);
+  assert.equal(day.reduce((n,x)=>n+x.hours,0),24-mode.hours);
+  day.forEach((a,i)=>assert.ok(a.hours>=a.min && a.hours<=ACTIVITIES[i].hours));
+ }
+});

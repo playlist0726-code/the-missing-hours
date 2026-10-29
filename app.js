@@ -1,12 +1,36 @@
-import { ACTIVITIES, createDay, removedHours, scoresFor, adjust, completeDay, mostTimeLost, formatTime } from './game.js';
+import { ACTIVITIES, MODES, MILESTONES, createDay, removedHours, scoresFor, adjust, completeDay, mostTimeLost, formatTime } from './game.js';
 const $ = selector => document.querySelector(selector);
 let day = createDay(), phase = 'intro', deadline = 0, timerId = null, confettiId = null;
 const labels = {health:'Health',education:'Education',life:'Work and relationships'};
 const grid = $('#activity-grid');
+let modeKey = 'normal', mode = MODES.normal, seenMilestones = new Set();
+let soundOn = true;
+const sounds = { choice:new Audio('./assets/audio/choice.wav'), complete:new Audio('./assets/audio/complete.wav') };
+Object.values(sounds).forEach(audio => { audio.volume = 0.22; audio.preload = 'auto'; });
+function playSound(name) {
+  if (!soundOn) return;
+  const audio = sounds[name]; audio.currentTime = 0;
+  audio.play().catch(() => {}); // Audio is optional when the browser blocks playback.
+}
+$('#sound-toggle').addEventListener('click',()=> {
+  soundOn = !soundOn;
+  if (!soundOn) Object.values(sounds).forEach(audio=>{audio.pause();audio.currentTime=0;});
+  $('#sound-toggle').textContent = `Sound: ${soundOn?'on':'off'}`;
+  $('#sound-toggle').setAttribute('aria-pressed',String(soundOn));
+  if (soundOn) playSound('choice');
+});
+function selectMode() {
+  modeKey = $('input[name="difficulty"]:checked').value;
+  mode = MODES[modeKey];
+  $('.time-lost').textContent = `${mode.hours} HOURS`;
+  $('#duration-copy').textContent = `${mode.seconds}-second challenge`;
+  $('#timer').textContent = formatTime(mode.seconds);
+}
+document.querySelectorAll('input[name="difficulty"]').forEach(input=>input.addEventListener('change', selectMode));
 
 // Create controls once, so updating a score never destroys keyboard focus.
 grid.innerHTML = ACTIVITIES.map((a,i) => `<article class="activity" id="activity-${a.id}">
-  <span class="activity-copy"><strong>${a.name}</strong><span id="detail-${a.id}"></span></span>
+  <span class="activity-copy"><strong>${a.name}</strong><span id="detail-${a.id}"></span><span class="hour-tokens" id="tokens-${a.id}" aria-hidden="true"></span></span>
   <span class="adjuster">
     <button type="button" data-index="${i}" data-action="minus" aria-label="Remove one hour from ${a.name}">−</button>
     <strong id="hours-${a.id}" aria-label="${a.name} hours">${a.hours}</strong>
@@ -28,9 +52,13 @@ function render() {
   day.forEach((a,i) => {
     const original = ACTIVITIES[i], lost = original.hours-a.hours;
     $(`#hours-${a.id}`).textContent = a.hours;
+    // Add/remove actual DOM nodes while preserving the adjustment buttons and focus.
+    const tokens = $(`#tokens-${a.id}`);
+    while(tokens.children.length>a.hours) tokens.lastElementChild.remove();
+    while(tokens.children.length<a.hours) { const token=document.createElement('i'); tokens.append(token); }
     $(`#detail-${a.id}`).textContent = `${original.hours}h planned${lost ? ` · −${lost}h` : ''} · −${a.loss} pts/h`;
     $(`#activity-${a.id}`).classList.toggle('changed',lost>0);
-    $(`[data-index="${i}"][data-action="minus"]`).disabled = phase!=='event' || a.hours<=a.min || removed>=3;
+    $(`[data-index="${i}"][data-action="minus"]`).disabled = phase!=='event' || a.hours<=a.min || removed>=mode.hours;
     $(`[data-index="${i}"][data-action="plus"]`).disabled = phase!=='event' || a.hours>=original.hours;
     $(`#segment-${a.id}`).style.flexGrow = a.hours;
     $(`#segment-${a.id}`).title = `${a.name}: ${a.hours} hours`;
@@ -43,9 +71,9 @@ function render() {
     $(`#${key}-meter`).style.width = `${scores[key]}%`;
   }
   $('#hours-value').textContent = 24-removed;
-  $('#cut-count').textContent = `${removed} / 3`;
-  $('#cut-meter').style.width = `${removed/3*100}%`;
-  $('#finish-button').disabled = phase!=='event' || removed!==3;
+  $('#cut-count').textContent = `${removed} / ${mode.hours}`;
+  $('#cut-meter').style.width = `${removed/mode.hours*100}%`;
+  $('#finish-button').disabled = phase!=='event' || removed!==mode.hours;
 }
 function clearCelebration() {
   clearTimeout(confettiId);
@@ -54,7 +82,10 @@ function clearCelebration() {
 function reset() {
   clearInterval(timerId); timerId = null; deadline = 0;
   clearCelebration(); day = createDay(); phase = 'intro';
-  $('#timer').textContent = '01:00';
+  selectMode();
+  seenMilestones.clear();
+  $('#milestone').hidden = true; $('#milestone').textContent = '';
+  Object.values(sounds).forEach(audio=>{audio.pause();audio.currentTime=0;});
   $('.timer-card').classList.remove('urgent');
   $('#stage-label').textContent = 'DAY 1 · PLAN';
   $('#stage-title').textContent = 'Meet your day';
@@ -79,17 +110,19 @@ function updateTimer() {
 function startEvent() {
   if (phase!=='plan') return;
   phase = 'event';
-  $('#stage-label').textContent = 'DAY 1 · WATER JOURNEY';
-  $('#stage-title').textContent = 'Where do 3 hours go?';
+  $('#stage-label').textContent = `DAY 1 · ${mode.name.toUpperCase()} · WATER JOURNEY`;
+  $('#stage-title').textContent = `Where do ${mode.hours} hours go?`;
+  $('#journey-title').textContent = `A water journey takes ${mode.hours} hours in this game`;
+  $('#journey-instruction').textContent = `Fictional ${mode.name.toLowerCase()} challenge: remove ${mode.hours} hours before time runs out.`;
   $('#stage-instruction').textContent = 'Use − to remove hours and + to undo. Each choice changes your scores.';
   $('#event-banner').hidden = false;
   $('#cut-progress').hidden = false;
   $('#lock-button').hidden = true;
   $('#finish-button').hidden = false;
   $('#aside-label').textContent = 'ACTIVITY HOURS LEFT';
-  $('#aside-copy').textContent = 'Make room for a three-hour water journey. You have 60 seconds. If time runs out, remaining hours come from the first available activities, starting with Sleep.';
+  $('#aside-copy').textContent = `Make room for a ${mode.hours}-hour water journey. You have ${mode.seconds} seconds. On timeout, remaining cuts come from activities in order, starting with Sleep.`;
   feedback('Choose an activity to lose an hour. You can undo a cut with +.');
-  deadline = performance.now()+60000;
+  deadline = performance.now()+mode.seconds*1000;
   render(); updateTimer(); timerId = setInterval(updateTimer,200);
   $('#stage-title').focus({preventScroll:true});
 }
@@ -104,9 +137,9 @@ function celebrate() {
   confettiId = setTimeout(clearCelebration,3300);
 }
 function finish(timedOut=false) {
-  if (phase!=='event' || (!timedOut && removedHours(day)!==3)) return;
+  if (phase!=='event' || (!timedOut && removedHours(day)!==mode.hours)) return;
   clearInterval(timerId); timerId = null;
-  if (timedOut) completeDay(day);
+  if (timedOut) completeDay(day,mode.hours);
   phase = 'result'; render();
   const scores = scoresFor(day), biggest = mostTimeLost(day).map(key=>labels[key]).join(' & ');
   $('#total-score').textContent = Object.values(scores).reduce((a,b)=>a+b,0);
@@ -116,8 +149,11 @@ function finish(timedOut=false) {
   }
   $('#impact-heading').textContent = timedOut ? 'Time ran out. The day still had to fit.' : `${biggest}: the biggest time tradeoff`;
   $('#impact-copy').textContent = `${timedOut ? 'The game assigned your remaining cuts in activity order. ' : ''}There is no perfect schedule when essential needs compete. Clean water closer to home can open up time for health, learning, work, and relationships.`;
-  $('#choices-summary').innerHTML = '<strong>Your three hours came from:</strong><ul>'+day.map((a,i)=>ACTIVITIES[i].hours-a.hours ? `<li>${a.name}: ${ACTIVITIES[i].hours-a.hours}h removed · ${a.hours}h left</li>` : '').join('')+'</ul>';
-  showScreen('result'); celebrate();
+  $('#choices-summary').innerHTML = `<strong>Your ${mode.hours} hours came from:</strong><ul>`+day.map((a,i)=>ACTIVITIES[i].hours-a.hours ? `<li>${a.name}: ${ACTIVITIES[i].hours-a.hours}h removed · ${a.hours}h left</li>` : '').join('')+'</ul>';
+  $('#result-scenario').textContent = `Your choices show how a ${mode.hours}-hour water journey can reshape an entire day.`;
+  $('#badge-title').textContent = `${mode.name} Time Saver badge earned`;
+  $('#badge-copy').textContent = `You made room for the water journey. Imagine those ${mode.hours} hours returned to your day through reliable access to clean water.`;
+  showScreen('result'); celebrate(); playSound('complete');
 }
 $('#start-button').addEventListener('click',()=> { phase='plan'; render(); showScreen('play'); });
 $('#lock-button').addEventListener('click',startEvent);
@@ -130,9 +166,16 @@ grid.addEventListener('click',event=> {
   // Check the deadline on input too, so a delayed browser tick cannot add time.
   if (performance.now()>=deadline) { finish(true); return; }
   const i=Number(button.dataset.index), a=day[i];
-  if (!adjust(day,i,button.dataset.action)) return;
-  render();
-  feedback(removedHours(day)===3 ? 'Three hours allocated. You can undo a choice or select See my impact.' : `${a.name}: ${a.hours}h left. ${labels[a.category]} is now ${scoresFor(day)[a.category]}/100.`);
+  if (!adjust(day,i,button.dataset.action,mode.hours)) return;
+  render(); playSound('choice');
+  MILESTONES.forEach((milestone,index)=> {
+    if (removedHours(day)/mode.hours>=milestone.fraction && !seenMilestones.has(index)) {
+      seenMilestones.add(index);
+      $('#milestone').hidden=false;
+      $('#milestone').textContent=milestone.message;
+    }
+  });
+  feedback(removedHours(day)===mode.hours ? 'Journey hours allocated. You can undo a choice or select See my impact.' : `${a.name}: ${a.hours}h left. ${labels[a.category]} is now ${scoresFor(day)[a.category]}/100.`);
 });
 document.addEventListener('visibilitychange',()=> { if (!document.hidden) updateTimer(); });
 reset();

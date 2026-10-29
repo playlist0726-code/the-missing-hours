@@ -2,23 +2,39 @@
 
 **One day. Limited time. Every hour matters.**
 
-A responsive awareness game inspired by charity: water, created for Web Development Project 5. Built with HTML, CSS, and vanilla JavaScript; no framework, installation, account, or backend required to play.
+A completed charity: water-inspired awareness game for Web Development Project 6, continuing the Project 5 prototype. Built with HTML, CSS, and vanilla JavaScript.
 
 **[Play the live game](https://playlist0726-code.github.io/the-missing-hours/)**
 
-![Game preview](docs/desktop-game.png)
+![Game preview](docs/desktop-intro.png)
 
 ## How to play
 
-1. Select **Start the day** to review a balanced 24-hour schedule.
-2. Select **Lock my schedule** to begin a fictional three-hour water-collection challenge and a 60-second timer.
-3. Use **−** to cut an hour from an activity. **+** restores a previously removed hour.
-4. Remove exactly three hours and select **See my impact**. Each cut changes Health, Education, or Life scores immediately.
-5. Review your Impact Score and the activities that lost time. Use **Play again** or **Reset game** to restore everything.
+1. Choose a difficulty, then select **Start the day** to review a balanced 24-hour schedule.
+2. **Lock my schedule** begins the water journey and timer.
+3. Use **−** to remove an activity hour. A square disappears and your category score changes. Use **+** to restore an hour.
+4. Allocate the required number of hours, then select **See my impact**.
+5. Review your choices and impact, explore charity: water's mission, or play again with another difficulty.
 
-There is no traditional loser. Completing the challenge earns a Time Saver badge and a brief confetti celebration, including when time expires. Reduced-motion preferences suppress confetti.
+| Mode | Journey hours | Timer |
+| --- | ---: | ---: |
+| Easy | 2 | 90 seconds |
+| Normal | 3 | 60 seconds |
+| Hard | 4 | 30 seconds |
 
-If time runs out, the game preserves your choices and assigns the remaining cuts in this order: Sleep, Class, Study, Work, Meals, Friends. A deadline-based timer prevents browser throttling from extending the round.
+If time expires, existing choices are preserved and remaining cuts are allocated in this order: Sleep, Class, Study, Work, Meals, Friends. The deadline is checked on every input as well as timer ticks. Reset clears the timer, scores, tokens, milestones, and result state. The selected difficulty and sound preference remain selected during the session.
+
+## Project 6 requirements
+
+- Three difficulty modes change both the goal and pace.
+- Activity hour tokens are actual DOM nodes, removed on cuts and re-created on undo.
+- Footer links to the official charity: water website and donation page.
+- Proxima Nova/Avenir font stack, with a bundled open-source Nunito Sans fallback for a similar geometric sans-serif appearance across devices.
+- Responsive layouts, labeled controls, keyboard focus, live announcements, and reduced-motion support.
+- **Sound LevelUp (+10):** downloaded local WAV clips play on choices and completion. Sound can be muted. Audio playback failure does not prevent play.
+- **Milestone LevelUp (+10):** an array of messages and progress conditionals trigger at 50% and 100% of the goal, once per round. Undo does not repeatedly trigger awards.
+
+The optional AI-feedback route informed three final improvements: make the time tradeoff visible with disappearing tokens, add progress milestones, and connect the final experience to the mission through a donation link. No human playtest feedback is claimed.
 
 ## Rules and scoring
 
@@ -31,56 +47,40 @@ If time runs out, the game preserves your choices and assigns the remaining cuts
 | Meals | 2 | 1 | Health | 10 |
 | Friends | 2 | 0 | Life | 7 |
 
-Each category starts at 100. The Impact Score is the sum, out of 300. All rules, minimums, and scores are game design choices. They do not quantify real wellbeing. The “biggest time tradeoff” reflects hours removed per category and handles ties.
+Each category starts at 100; the total Impact Score is out of 300. Scores and scenario durations are fictional game design choices, not measures of real wellbeing or universal water-collection statistics. There is no perfect choice: essential needs compete for limited time. This is an independent student project, not an official charity: water product.
 
-The three-hour journey is a fictional scenario, not a universal statistic. This independent educational project does not claim to simulate any person's or community's lived experience, and is not an official charity: water product.
+## Run and test
 
-## Project 5 requirements
-
-- Interactive HTML/CSS/JavaScript game with a 60-second timer.
-- Live score tracking, feedback, and a visual schedule.
-- Responsive desktop, tablet, and mobile layouts.
-- **Challenge LevelUp:** water journey cuts reduce category scores.
-- **Reset LevelUp:** Reset game and Play again clear the timer, scores, cuts, progress, and screen state.
-- **Celebration LevelUp:** Time Saver badge and confetti on completion.
-- Public GitHub repository and GitHub Pages deployment.
-- Submission PDF and personal reflection drafts are delivered separately and are excluded from this public repository.
-
-## Run locally
-
-Use Python 3 to serve the project folder:
+No dependency installation or build step is required.
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000/`. A local server is needed because the JavaScript uses native modules.
-
-## Test
-
-With Node.js 18 or newer:
+Open `http://localhost:8000/`. ES modules require an HTTP server.
 
 ```sh
 npm test
 ```
 
-There are no npm dependencies. GitHub Actions runs the same six rule tests on pushes and pull requests. See [QA notes](docs/QA.md) for browser verification.
+Seven automated rule tests cover scoring, limits, restoration, timeout, formatting, and all difficulty goals. GitHub Actions runs them on pushes and pull requests. See [QA notes](docs/QA.md) for browser checks.
 
 ## Files
 
-- `index.html`: semantic interface and all three screens.
-- `styles.css`: branding, layout, responsive styles, and reduced-motion support.
-- `game.js`: scoring, activity limits, undo, and timeout rules.
-- `app.js`: DOM updates, focus, timer, reset, and confetti.
-- `tests/game.test.js`: rule and boundary tests.
-- `docs/`: gameplay screenshots and QA notes.
+- `index.html`: game screens, difficulty selection, mission links.
+- `styles.css`: responsive layout and branding.
+- `game.js`: pure scoring, difficulty, and timeout rules.
+- `app.js`: DOM updates, timer, sound, milestones, and focus.
+- `assets/`: local fonts, audio, and licensing notes.
+- `tests/`: automated game-rule tests.
+- `docs/`: screenshots and QA notes.
 
-## GitHub Pages
+## Publishing
 
-This site serves the root of the `main` branch through GitHub Pages. To deploy a copy, push these files to your own repository, then select **Settings → Pages → Deploy from a branch → main → / (root)**. Update the live URLs in this README and the submission document for your repository.
+GitHub Pages serves the root of the `main` branch. The live URL above is the evaluator link. Private reflection answers and the completed submission PDF are delivered separately and are not committed to this public repository.
 
-## Design and acknowledgments
+## Credits
 
-This prototype continues the earlier **The Missing Hours** Project 4 concept. AI assisted with implementation, debugging, documentation, and validation. Colors are inspired by charity: water's published palette (yellow `#FFC907`, navy `#003366`, blue-gray `#77A8BB`). The clock illustration is made with CSS; the game uses no third-party photography or external font requests.
+AI assisted with implementation, debugging, documentation, and validation. The clock is drawn with CSS.
 
-Brand references: [charity: water media resources](https://www.charitywater.org/about/media), [Brand Usage Guide](https://assets.ctfassets.net/2w85ks0ylymt/2UwAu4A13yqcXT708Fe8c3/2720347e0f034232827402376440aa7a/cw_Brand_Usage_Guide.pdf). Learn about the mission at [charitywater.org](https://www.charitywater.org/).
+Brand reference: [official charity: water frontend typography guidance](https://charitywater.github.io/cw-puddle/guidelines/). Typography fallback: [Nunito Sans](https://github.com/google/fonts/tree/main/ofl/nunitosans), included under the SIL Open Font License. Sounds: [Mixkit free video game sound effects](https://mixkit.co/free-sound-effects/video-game/), included as part of this game under the [Mixkit Sound Effects Free License](https://mixkit.co/license/#sfxFree); see [asset credits](assets/CREDITS.md).

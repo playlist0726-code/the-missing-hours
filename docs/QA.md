@@ -1,23 +1,23 @@
-# Verification — October 22, 2026
+# Project 6 validation
+
+Checked October 29, 2026.
 
 ## Automated rules
 
-`npm test` passes six tests, covering the 24-hour initial total, independent resets, minimum activity hours, the three-hour cap, undo boundaries, weighted scoring, tied time tradeoffs, deterministic timeout completion, clock formatting, and all legal sequences through three cuts.
+`npm test`: 7/7 tests passed. Covers starting state, separate resets, bounds, weighted scores, tied impacts, timeout preservation, legal cut sequences, clock formatting, and Easy/Normal/Hard goals with undo and timeout.
 
 ## Browser checks
 
-Verified in a fresh, non-persistent Chrome browser context (no signed-in session):
+Tested with headless Google Chrome in a fresh isolated browser context, without an authenticated GitHub session.
 
-- Start → review schedule → lock schedule → cut hours → results.
-- Removing Meals reduces Health by 10 and disables further cuts at its minimum.
-- Undo restores both hours and score.
-- Sleep, Class, and Friends cuts produce an Impact Score of 268.
-- Replay and Reset game restore initial state and controls.
-- A virtual browser clock advances the real round through its 60-second deadline; existing cuts are preserved and the rest are assigned automatically.
-- Every screen fits widths of 320, 375, 768, 1024, and 1440 pixels without horizontal overflow.
-- Completion creates confetti; reduced-motion mode suppresses it.
-- No uncaught JavaScript errors during the tested flows.
+- All three difficulty modes complete at their own goals.
+- Hour-token DOM count changes from 24 to 24 minus journey hours and increases on undo.
+- Undo disables completion until the goal is restored.
+- Milestone text appears at the goal.
+- Results show the selected journey length and reset returns to the introduction.
+- Hard-mode real timeout preserves the existing cut and allocates exactly four total hours.
+- Sound toggle updates its pressed state; audio and font files serve successfully.
+- Desktop (1440 px), tablet (768 px), and mobile (375 px) layouts checked; no horizontal overflow.
+- No JavaScript page errors during these interactions.
 
-The screenshots in this folder show the desktop intro, gameplay, results, and mobile states. Live GitHub Pages availability is verified after publishing.
-
-This is a student prototype. Full manual screen-reader testing and physical-device testing have not been performed.
+Screenshots in this directory show the final version. The private submission PDF includes the live GitHub Pages URL and all written answers.

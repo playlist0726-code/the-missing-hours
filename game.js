@@ -1,4 +1,14 @@
 // Pure game rules: the interface and tests use the same scoring logic.
+export const MODES = Object.freeze({
+  easy: Object.freeze({ name:'Easy', hours:2, seconds:90 }),
+  normal: Object.freeze({ name:'Normal', hours:3, seconds:60 }),
+  hard: Object.freeze({ name:'Hard', hours:4, seconds:30 })
+});
+// Each milestone is shown once per round, even after an undo.
+export const MILESTONES = Object.freeze([
+  { fraction:0.5, message:'Halfway there! Every hour has a tradeoff.' },
+  { fraction:1, message:'Journey ready! Review your choices, then see your impact.' }
+]);
 export const ACTIVITIES = Object.freeze([
   { id:'sleep', name:'Sleep', hours:8, min:5, category:'health', loss:12 },
   { id:'class', name:'Class', hours:5, min:2, category:'education', loss:13 },
@@ -14,18 +24,18 @@ export function scoresFor(day) {
   ACTIVITIES.forEach((a,i) => { scores[a.category] -= (a.hours-day[i].hours)*a.loss; });
   return scores;
 }
-export function adjust(day,index,direction) {
+export function adjust(day,index,direction,target=3) {
   const a = day[index], original = ACTIVITIES[index];
   if (!a || !['minus','plus'].includes(direction)) return false;
-  if (direction === 'minus' && (a.hours <= a.min || removedHours(day) >= 3)) return false;
+  if (direction === 'minus' && (a.hours <= a.min || removedHours(day) >= target)) return false;
   if (direction === 'plus' && a.hours >= original.hours) return false;
   a.hours += direction === 'minus' ? -1 : 1;
   return true;
 }
-export function completeDay(day) {
+export function completeDay(day,target=3) {
   // A predictable timeout rule: fill remaining cuts in listed activity order.
-  for (let i=0;i<day.length && removedHours(day)<3;i++) {
-    while (day[i].hours>day[i].min && removedHours(day)<3) adjust(day,i,'minus');
+  for (let i=0;i<day.length && removedHours(day)<target;i++) {
+    while (day[i].hours>day[i].min && removedHours(day)<target) adjust(day,i,'minus',target);
   }
   return day;
 }
