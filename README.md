@@ -1,3 +1,11 @@
+## Portfolio context
+
+**[Case study](https://playlist0726-code.github.io/projects/the-missing-hours/)** · [Play demo](https://playlist0726-code.github.io/the-missing-hours/) · [Portfolio](https://playlist0726-code.github.io/)
+
+An interactive time-allocation game developed with AI assistance for Global Career Accelerator coursework. The design connects a limited time budget to an awareness message, with keyboard interaction and responsive feedback. This is a charity: water-inspired student project, not an official campaign or commissioned client work.
+
+---
+
 # The Missing Hours
 
 **One day. Limited time. Every hour matters.**
